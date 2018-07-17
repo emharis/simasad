@@ -15,7 +15,7 @@ class Login_Controller extends Base_Controller {
         parent::__construct();
         
         //filter PEMBAJAKAN
-        $this->filter('before', 'snkey');
+        //$this->filter('before', 'snkey');
     }
     
     public function get_index(){

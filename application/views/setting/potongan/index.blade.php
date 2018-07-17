@@ -29,7 +29,7 @@
                 var getListUrl = "{{ URL::to('setting/potongan/listpotongan') }}" + "/" + tahunid;
                 jQuery('#tabelData').load(getListUrl,function(){
                     //reinitiate datatable
-                    $('.datatable').dataTable({
+                    $('#table-data').dataTable({
                                 "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span12'i><'span12 center'p>>",
                                 "sPaginationType": "bootstrap",
                                 "iDisplayLength": 50,
@@ -62,10 +62,26 @@
                  if(confirm('Anda akan menghapus data ini?')){
                         var id = jQuery(this).attr('potid');
                         var rownumber = jQuery(this).attr('rownumber');
-                        var delUrl = "{{ URL::to('setting/potongan/delete') }}";
-                        jQuery.get(delUrl,{id:id}).done(function(){
+                        var delUrl = 'setting/potongan/delete/'+id; 
+                        // alert(delUrl);
+                        // jQuery.get(delUrl,{id:id}).done(function(){
+                        //     //remove row item
+                        //     jQuery('#row_'+ parseInt(rownumber)).hide(250);
+                        // }).fail(function(){
+                        //     alert('.::PERINGATAN::. Data gagal dihapus.');
+                        // });
+                        var tbrow = $(this).parent().parent();
+                        // tbrow.hide();
+
+                        $.get(delUrl,null,function(){
                             //remove row item
-                            jQuery('#row_'+ parseInt(rownumber)).hide(250);
+                            // jQuery('#row_'+ parseInt(rownumber)).hide(250);
+                            // $('#table-data').row( tbrow )
+                            //                 .remove()
+                            //                 .draw();
+                            tbrow.fadeOut(250,function(){
+                                tbrow.remove();
+                            });
                         }).fail(function(){
                             alert('.::PERINGATAN::. Data gagal dihapus.');
                         });

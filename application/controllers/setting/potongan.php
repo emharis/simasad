@@ -97,8 +97,60 @@ class Setting_Potongan_Controller extends Base_Controller {
     }
     
     public function get_listpotongan($tahunajaranid){
-        $tahunajaran = Tahunajaran::find($tahunajaranid);
-        return View::make('setting.potongan.ajaxlistpotongan')->with('tahunajaran',$tahunajaran);
+        // $tahunajaran = Tahunajaran::find($tahunajaranid);
+        // return View::make('setting.potongan.ajaxlistpotongan')->with('tahunajaran',$tahunajaran);
+
+        $data = DB::query("SELECT
+                potongan.id,
+                potongan.siswa_id,
+                siswa.nisn,
+                siswa.nama AS nama_siswa,
+                rombel.id AS rombel_id,
+                rombel.nama AS rombel,
+                case when jenis = 'BP' then 'Bantuan Pendidikan' else 'Beasiswa Prestasi' end AS jenis_potongan,
+                potongan.jenis,
+                potongan.ket,
+                potongan.jenisbiaya_id,
+                jenisbiaya.nama AS jenis_biaya,
+                potongan.bulan_id,
+                potongan.tahunajaran_id,
+                case when potongan.bulan_id != '' then bulan.nama else '-' end AS bulan,
+                case when jenisbiaya_id = 1 then
+                (select jumlah from ketentuanbiaya where jenisbiaya_id= potongan.jenisbiaya_id
+                    and tahunajaran_id = potongan.tahunajaran_id and jenjang = siswa.jenjang_spp)
+                else
+                (select jumlah from ketentuanbiaya where jenisbiaya_id= potongan.jenisbiaya_id
+                    and tahunajaran_id = potongan.tahunajaran_id and jenjang = rombel.jenjang)
+                end as harus_bayar,
+                potongan.disc,
+                potongan.nilai,
+                case when jenisbiaya_id = 1 then
+                (select jumlah from ketentuanbiaya where jenisbiaya_id= potongan.jenisbiaya_id
+                    and tahunajaran_id = potongan.tahunajaran_id and jenjang = siswa.jenjang_spp) - potongan.nilai
+                else
+                (select jumlah from ketentuanbiaya where jenisbiaya_id= potongan.jenisbiaya_id
+                    and tahunajaran_id = potongan.tahunajaran_id and jenjang = rombel.jenjang) - potongan.nilai
+                end as sisa_bayar
+                
+            FROM
+                siswa
+                INNER JOIN potongan
+                 ON siswa.id = potongan.siswa_id
+                INNER JOIN rombelsiswa
+                 ON siswa.id = rombelsiswa.siswa_id
+                INNER JOIN rombel
+                 ON rombelsiswa.rombel_id = rombel.id
+                INNER JOIN jenisbiaya
+                 ON potongan.jenisbiaya_id = jenisbiaya.id
+                LEFT OUTER JOIN bulan
+                 ON potongan.bulan_id = bulan.id
+            WHERE
+                potongan.tahunajaran_id = " . $tahunajaranid . "
+                and rombelsiswa.tahunajaran_id = " . $tahunajaranid);
+
+        // echo count($data);
+
+        return View::make('setting.potongan.ajaxlistpotongan_2')->with('data',$data);
     }
     
     public function get_listsiswa(){
